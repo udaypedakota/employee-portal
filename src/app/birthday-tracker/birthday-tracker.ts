@@ -105,8 +105,9 @@ export class BirthdayTrackerComponent implements OnInit {
   deleteTargetLabel = '';
 
   ngOnInit() {
-    this.svc.seedEvents();
-    this.empSvc.load().subscribe(() => this.refresh());
+    this.empSvc.load().subscribe(() => {
+      this.svc.seedEvents().subscribe(() => this.refresh());
+    });
   }
 
   refresh() {
@@ -247,24 +248,23 @@ export class BirthdayTrackerComponent implements OnInit {
 
   get sortedEvents(): BirthdayEvent[] {
     const today = new Date();
-    const mmdd = (d: string) => d.slice(5); // 'YYYY-MM-DD' → 'MM-DD'
     const todayMMDD = `${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-    const currentMMDD = `${String(today.getMonth()+1).padStart(2,'0')}-01`; // start of current month
+    const mmdd = (d: string) => d.slice(5); // 'YYYY-MM-DD' → 'MM-DD'
 
     return [...this.events]
-      .filter(e => {
-        const md = mmdd(e.birthDate || e.celebrationDate);
-        // show only current month and past months (not future months)
-        return md <= todayMMDD || md.slice(0,2) <= todayMMDD.slice(0,2);
-      })
       .sort((a, b) => {
-        const amd = mmdd(a.birthDate || a.celebrationDate);
-        const bmd = mmdd(b.birthDate || b.celebrationDate);
+        const amd = mmdd(a.celebrationDate);
+        const bmd = mmdd(b.celebrationDate);
         const aToday = amd === todayMMDD;
         const bToday = bmd === todayMMDD;
         if (aToday && !bToday) return -1;
         if (!aToday && bToday) return 1;
-        // sort rest descending (most recent first)
+        // upcoming first, then past descending
+        const aUpcoming = amd >= todayMMDD;
+        const bUpcoming = bmd >= todayMMDD;
+        if (aUpcoming && !bUpcoming) return -1;
+        if (!aUpcoming && bUpcoming) return 1;
+        if (aUpcoming && bUpcoming) return amd.localeCompare(bmd);
         return bmd.localeCompare(amd);
       });
   }
@@ -273,6 +273,10 @@ export class BirthdayTrackerComponent implements OnInit {
     const today = new Date();
     const mmdd = `${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     return (dateStr || '').slice(5) === mmdd;
+  }
+
+  birthdayMMDD(e: BirthdayEvent): string {
+    return (e.birthDate || e.celebrationDate).slice(5);
   }
 
   // ── QR Modal ──

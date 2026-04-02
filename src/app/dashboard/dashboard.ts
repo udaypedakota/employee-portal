@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Employee } from '../employee/employee.data';
 import { EmployeeService } from '../employee/employee.service';
+import { BirthdayFundService } from '../birthday-tracker/birthday-fund.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,7 +15,7 @@ import { EmployeeService } from '../employee/employee.service';
   styleUrl: './dashboard.css'
 })
 export class Dashboard implements OnInit, OnDestroy {
-  constructor(public router: Router, private employeeService: EmployeeService) { }
+  constructor(public router: Router, private employeeService: EmployeeService, private birthdaySvc: BirthdayFundService) { }
 
   get greeting() {
     const h = new Date().getHours();
@@ -33,30 +34,16 @@ export class Dashboard implements OnInit, OnDestroy {
 
   loadTodayBirthdays() {
     const today = new Date();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const todayMMDD = `${mm}-${dd}`;
-    const events: any[] = JSON.parse(localStorage.getItem('bf_events') || '[]');
+    const todayMMDD = `${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const employees = this.employeeService.getAll();
-    this.todayBirthdays = events
-      .filter(e => {
-        const d = e.birthDate || '';
-        // birthDate format: YYYY-MM-DD
-        const parts = d.split('-');
-        if (parts.length === 3) return `${parts[1]}-${parts[2]}` === todayMMDD;
-        return false;
-      })
-      .map(e => {
-        const emp = employees.find(x => x.id === e.employeeId);
-        return {
-          id: e.employeeId,
-          name: e.employeeName,
-          role: emp?.role || '',
-          department: emp?.department || '',
-          avatar: emp?.avatar,
-          gender: emp?.gender,
-        };
-      });
+    this.birthdaySvc.seedEvents().subscribe(events => {
+      this.todayBirthdays = events
+        .filter(e => (e.birthDate || '').slice(5) === todayMMDD)
+        .map(e => {
+          const emp = employees.find(x => x.id === e.employeeId);
+          return { id: e.employeeId, name: e.employeeName, role: emp?.role || '', department: emp?.department || '', avatar: emp?.avatar, gender: emp?.gender };
+        });
+    });
   }
 
   fullStackDevs: Employee[] = [];

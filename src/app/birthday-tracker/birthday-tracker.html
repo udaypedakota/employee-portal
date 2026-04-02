@@ -34,11 +34,11 @@
       <div class="event-grid">
         <div class="event-card"
           *ngFor="let e of sortedEvents"
-          [class.completed]="isPast(e.celebrationDate) && !isToday(e.birthDate || e.celebrationDate)"
-          [class.today-bday]="isToday(e.birthDate || e.celebrationDate)">
+          [class.completed]="isPast(e.celebrationDate) && !isToday(e.celebrationDate)"
+          [class.today-bday]="isToday(e.celebrationDate)">
 
           <!-- Today confetti -->
-          <div class="card-confetti" *ngIf="isToday(e.birthDate || e.celebrationDate)">
+          <div class="card-confetti" *ngIf="isToday(e.celebrationDate)">
             <span *ngFor="let i of [0,1,2,3,4,5,6,7,8,9]" class="cc" [style.left.%]="i*10" [style.animation-delay]="(i*0.2)+'s'"></span>
           </div>
 
@@ -49,8 +49,8 @@
             <div class="event-info">
               <strong>{{ e.employeeName }}</strong>
               <span class="event-date">🎂 {{ e.celebrationDate | date:'dd MMM yyyy' }}</span>
-              <span class="today-badge" *ngIf="isToday(e.birthDate || e.celebrationDate)">🎉 Birthday Today!</span>
-              <span class="done-badge" *ngIf="isPast(e.celebrationDate) && !isToday(e.birthDate || e.celebrationDate)">✅ Completed</span>
+              <span class="today-badge" *ngIf="isToday(e.celebrationDate)">🎉 Birthday Today!</span>
+              <span class="done-badge" *ngIf="isPast(e.celebrationDate) && !isToday(e.celebrationDate)">✅ Completed</span>
               <span class="event-note" *ngIf="e.notes">{{ e.notes }}</span>
             </div>
             <button class="icon-btn edit" (click)="openEditModal(e); $event.stopPropagation()">✏️</button>
@@ -64,9 +64,9 @@
             </div>
           </div>
           <button class="btn-outline full-width"
-            [disabled]="isPast(e.celebrationDate) && !isToday(e.birthDate || e.celebrationDate)"
+            [disabled]="isPast(e.celebrationDate) && !isToday(e.celebrationDate)"
             (click)="selectEvent(e.id)">
-            {{ isPast(e.celebrationDate) && !isToday(e.birthDate || e.celebrationDate) ? '✅ Celebration Done' : 'Manage →' }}
+            {{ isPast(e.celebrationDate) && !isToday(e.celebrationDate) ? '✅ Celebration Done' : 'Manage →' }}
           </button>
         </div>
       </div>
