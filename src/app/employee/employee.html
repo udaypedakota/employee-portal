@@ -1,0 +1,120 @@
+<div class="emp-wrapper">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="brand-text">💡 Intellect</span>
+      <span class="divider"></span>
+      <span class="portal-name">Employee Portal</span>
+    </div>
+    <button class="back-btn" (click)="goBack()">← Back to Dashboard</button>
+  </header>
+
+  <main class="main" *ngIf="employee; else notFound">
+
+    <!-- Profile Hero -->
+    <div class="profile-hero">
+      <div class="avatar-circle">
+        <img
+          [src]="employee.avatar || 'https://randomuser.me/api/portraits/' + (employee.gender === 'female' ? 'women' : 'men') + '/' + employee.id.slice(-2) + '.jpg'"
+          [alt]="employee.name"
+          class="avatar-img"
+          onerror="this.src=''"
+        />
+      </div>
+      <div class="hero-info">
+        <h1>{{ employee.name }}</h1>
+        <span class="role-badge">{{ employee.role }}</span>
+        <p class="emp-id">🪪 Employee ID: <strong>{{ employee.id }}</strong></p>
+      </div>
+    </div>
+
+    <!-- Detail Cards -->
+    <div class="detail-grid">
+
+      <div class="detail-card">
+        <div class="card-icon" style="background:#e8f1fb;color:#0055a5">🏢</div>
+        <div>
+          <span class="card-label">Department</span>
+          <span class="card-value">{{ employee.department }}</span>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="card-icon" style="background:#e0f5f2;color:#00897b">✉</div>
+        <div>
+          <span class="card-label">Email</span>
+          <span class="card-value">{{ employee.email }}</span>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="card-icon" style="background:#fff3e0;color:#f57c00">📞</div>
+        <div>
+          <span class="card-label">Phone</span>
+          <span class="card-value">{{ employee.phone}}</span>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="card-icon" style="background:#f3e5f5;color:#8e24aa">💼</div>
+        <div>
+          <span class="card-label">Role</span>
+          <span class="card-value">{{ employee.role }}</span>
+        </div>
+      </div>
+
+      <div class="detail-card full-width" *ngIf="employee.skills">
+        <div class="card-icon" style="background:#e8f1fb;color:#0055a5">🛠</div>
+        <div>
+          <span class="card-label">Skills</span>
+          <span class="card-value">{{ employee.skills }}</span>
+        </div>
+      </div>
+
+      <div class="detail-card full-width" *ngIf="employee.projects">
+        <div class="card-icon" style="background:#e0f5f2;color:#00897b">📁</div>
+        <div>
+          <span class="card-label">Projects</span>
+          <span class="card-value">{{ employee.projects }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- About Section (PM only) -->
+    <div class="about-section" *ngIf="employee.about">
+      <div class="section-header">
+        <span class="section-icon">👤</span>
+        <h3>About</h3>
+      </div>
+      <p class="about-text">{{ employee.about }}</p>
+    </div>
+
+    <!-- Interesting Facts (PM only) -->
+    <div class="facts-section" *ngIf="employee.facts">
+      <div class="section-header">
+        <span class="section-icon">✨</span>
+        <h3>Interesting Facts</h3>
+      </div>
+      <div class="facts-grid">
+        <div class="fact-card" *ngFor="let f of employee.facts">
+          <span class="fact-icon">{{ f.icon }}</span>
+          <div>
+            <span class="fact-label">{{ f.label }}</span>
+            <span class="fact-value">{{ f.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <ng-template #notFound>
+    <div class="not-found">
+      <p>Employee not found.</p>
+      <button (click)="goBack()">← Go Back</button>
+    </div>
+  </ng-template>
+
+</div>

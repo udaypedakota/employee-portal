@@ -1,0 +1,286 @@
+<div class="dash-wrapper">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="brand-text">💡 Intellect Informatics</span>
+      <span class="divider"></span>
+      <span class="portal-name">Employee Portal</span>
+    </div>
+    <div class="topbar-right">
+      <span class="date-badge">📅 {{ today }} &nbsp; 🕐 {{ currentTime }}</span>
+      <button class="work-status-btn" (click)="router.navigate(['/work-status'])">📊 Work Status</button>
+      <button class="work-status-btn" (click)="router.navigate(['/birthday-tracker'])">🥳 Party Tracker</button>
+      <button class="add-emp-btn" (click)="openAddModal()">➕ Add Employee</button>
+      <button class="logout-btn" (click)="logout()">⏻ Logout</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Welcome -->
+    <div class="welcome-bar">
+      <div>
+        <h2>{{ greeting }}</h2>
+        <p>Here is an overview of your Intellect team.</p>
+      </div>
+    </div>
+
+    <!-- Project Manager Card -->
+    <div class="pm-card" *ngIf="manager" (click)="viewEmployee(manager.id)">
+      <div class="pm-avatar">{{ manager.name.charAt(0) }}</div>
+      <div class="pm-info">
+        <span class="pm-tag">Project Manager</span>
+        <h4>{{ manager.name }}</h4>
+        <span class="pm-id">{{ manager.id }}</span>
+      </div>
+      <span class="pm-arrow">→</span>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card" *ngFor="let s of stats" [style.--accent]="s.color" [style.--bg]="s.bg">
+        <div class="stat-icon" [style.background]="s.bg" [style.color]="s.color">{{ s.icon }}</div>
+        <div class="stat-info">
+          <span class="stat-value" [style.color]="s.color">{{ s.value }}</span>
+          <span class="stat-label">{{ s.label }}</span>
+        </div>
+        <div class="stat-bar">
+          <div class="stat-fill" [style.width.%]="(s.value / 36) * 100" [style.background]="s.color"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="content-row">
+
+      <!-- Team Breakdown Chart -->
+      <div class="chart-card">
+        <h3>Team Composition</h3>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 200 200" class="donut-svg">
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#e8f1fb" stroke-width="28"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#0055a5" stroke-width="28"
+                    stroke-dasharray="244.3 439.8" stroke-dashoffset="0" stroke-linecap="butt"
+                    class="seg" [class.seg-active]="selectedTeam?.color === '#0055a5'"
+                    (click)="selectSegment(teams[0])" style="cursor:pointer"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#f57c00" stroke-width="28"
+                    stroke-dasharray="61.1 439.8" stroke-dashoffset="-244.3" stroke-linecap="butt"
+                    class="seg" [class.seg-active]="selectedTeam?.color === '#f57c00'"
+                    (click)="selectSegment(teams[1])" style="cursor:pointer"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#8e24aa" stroke-width="28"
+                    stroke-dasharray="36.6 439.8" stroke-dashoffset="-305.4" stroke-linecap="butt"
+                    class="seg" [class.seg-active]="selectedTeam?.color === '#8e24aa'"
+                    (click)="selectSegment(teams[2])" style="cursor:pointer"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#e53935" stroke-width="28"
+                    stroke-dasharray="61.1 439.8" stroke-dashoffset="-342" stroke-linecap="butt"
+                    class="seg" [class.seg-active]="selectedTeam?.color === '#e53935'"
+                    (click)="selectSegment(teams[3])" style="cursor:pointer"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#00695c" stroke-width="28"
+                    stroke-dasharray="24.4 439.8" stroke-dashoffset="-403.1" stroke-linecap="butt"
+                    class="seg" [class.seg-active]="selectedTeam?.color === '#00695c'"
+                    (click)="selectSegment(teams[4])" style="cursor:pointer"/>
+            <text x="100" y="95" text-anchor="middle" font-size="28" font-weight="800" fill="#003366">{{ stats[0]?.value }}</text>
+            <text x="100" y="115" text-anchor="middle" font-size="11" fill="#94a3b8">Members</text>
+          </svg>
+        </div>
+        <div class="legend">
+          <div class="legend-item" *ngFor="let t of teams" style="cursor:pointer" (click)="selectSegment(t)">
+            <span class="dot" [style.background]="t.color"></span>
+            <span class="leg-role">{{ t.role }}</span>
+            <span class="leg-count" [style.color]="t.color">{{ t.count }}</span>
+          </div>
+        </div>
+
+        <!-- Segment Detail Popup -->
+        <div class="seg-popup" *ngIf="selectedTeam" [style.border-color]="selectedTeam.color">
+          <div class="seg-popup-header" [style.background]="selectedTeam.color + '18'">
+            <span class="seg-popup-icon">{{ selectedTeam.icon }}</span>
+            <div>
+              <strong [style.color]="selectedTeam.color">{{ selectedTeam.role }}</strong>
+              <span class="seg-popup-count" [style.color]="selectedTeam.color">{{ selectedTeam.count }} members</span>
+            </div>
+            <button class="seg-popup-close" (click)="selectedTeam = null">✕</button>
+          </div>
+          <div class="seg-popup-list">
+            <div class="seg-popup-chip" *ngFor="let e of selectedTeam.employees" (click)="viewEmployee(e.id)">
+              <span class="chip-avatar" [style.background]="selectedTeam.color + '22'" [style.color]="selectedTeam.color">{{ e.name.charAt(0) }}</span>
+              <div class="chip-info">
+                <span class="chip-name">{{ e.name }}</span>
+                <span class="chip-id">{{ e.id }}</span>
+              </div>
+              <span class="chip-arrow" [style.color]="selectedTeam.color">›</span>
+              <button class="delete-btn" (click)="$event.stopPropagation(); deleteEmployee(e.id)">🗑</button>
+            </div>
+            <div *ngIf="selectedTeam.employees.length === 0" class="coming-soon">🔜 Data coming soon</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Cards -->
+      <div class="teams-col">
+        <h3>Teams</h3>
+        <div class="team-card" *ngFor="let t of teams" [class.open]="activeTeam === t.role">
+          <div class="team-header" (click)="toggleTeam(t.role)">
+            <div class="team-left">
+              <span class="team-icon" [style.background]="t.color + '18'" [style.color]="t.color">{{ t.icon }}</span>
+              <div>
+                <strong>{{ t.role }}</strong>
+                <span class="team-count" [style.color]="t.color">{{ t.count }} members</span>
+              </div>
+            </div>
+            <span class="chevron" [class.rotated]="activeTeam === t.role">›</span>
+          </div>
+          <div class="member-list" *ngIf="activeTeam === t.role">
+            <!-- Real employees with click navigation -->
+            <ng-container *ngIf="t.employees.length > 0">
+              <div class="member-chip clickable" *ngFor="let e of t.employees" (click)="viewEmployee(e.id)">
+                <span class="chip-avatar" [style.background]="t.color + '22'" [style.color]="t.color">{{ e.name.charAt(0) }}</span>
+                <div class="chip-info">
+                  <span class="chip-name">{{ e.name }}</span>
+                  <span class="chip-id">{{ e.id }}</span>
+                </div>
+                <span class="chip-arrow" [style.color]="t.color">›</span>
+                <button class="delete-btn" (click)="$event.stopPropagation(); deleteEmployee(e.id)">🗑</button>
+              </div>
+            </ng-container>
+            <!-- Placeholder chips for teams without data yet -->
+            <ng-container *ngIf="t.employees.length === 0">
+              <span class="member-chip coming-soon">🔜 Data coming soon</span>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Birthday Notification - Fixed floating bottom-right -->
+  <div class="bday-notification" *ngIf="todayBirthdays.length > 0">
+    <div class="bday-notif-card" *ngFor="let b of todayBirthdays; let i = index"
+      [style.bottom]="(24 + i * 110) + 'px'"
+      (click)="viewEmployee(b.id)">
+      <div class="confetti-wrap">
+        <span class="confetti" *ngFor="let c of confettiItems"
+          [style.left.%]="(c * 37) % 100"
+          [style.animation-delay]="(c * 0.15) + 's'"
+          [style.background]="['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff922b','#cc5de8'][(c % 6)]">
+        </span>
+      </div>
+      <div class="bday-notif-inner">
+        <div class="bday-notif-avatar">
+          <img *ngIf="b.avatar" [src]="b.avatar" [alt]="b.name"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+          <span [style.display]="b.avatar ? 'none' : 'flex'">{{ b.name.charAt(0) }}</span>
+        </div>
+        <div class="bday-notif-info">
+          <span class="bday-notif-tag">🎉 Birthday Today!</span>
+          <strong>{{ b.name }}</strong>
+          <span>{{ b.role }}</span>
+        </div>
+        <span class="bday-notif-wave">👋</span>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="showDeleteModal = false">
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+      <div class="delete-modal-icon">🗑️</div>
+      <h3>Remove Employee</h3>
+      <p>Are you sure you want to delete <strong>{{ deleteTargetName }}</strong>? This action cannot be undone.</p>
+      <div class="delete-modal-actions">
+        <button class="btn-cancel" (click)="showDeleteModal = false">Cancel</button>
+        <button class="btn-delete-confirm" (click)="confirmDelete()">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Employee Modal -->
+  <div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>➕ Add New Employee</h3>
+        <button class="modal-close" (click)="closeAddModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Employee ID *</label>
+            <input [(ngModel)]="newEmployee.id" placeholder="e.g. CBHYD663" />
+          </div>
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input [(ngModel)]="newEmployee.name" placeholder="e.g. John Doe" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Role *</label>
+            <select [(ngModel)]="newEmployee.role">
+              <option value="">Select role</option>
+              <option>Full-stack Developer</option>
+              <option>Tester</option>
+              <option>UI Developer</option>
+              <option>UI/UX Designer</option>
+              <option>Network</option>
+              <option>Project Manager</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Department *</label>
+            <select [(ngModel)]="newEmployee.department">
+              <option value="">Select department</option>
+              <option>Software Engineering</option>
+              <option>Testing</option>
+              <option>UI Development</option>
+              <option>Design</option>
+              <option>Infrastructure</option>
+              <option>Management</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email *</label>
+            <input [(ngModel)]="newEmployee.email" placeholder="email@intellectinfo.com" />
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input [(ngModel)]="newEmployee.phone" placeholder="+91 98765 XXXXX" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Gender</label>
+            <select [(ngModel)]="newEmployee.gender">
+              <option value="">Select</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Skills</label>
+            <input [(ngModel)]="newEmployee.skills" placeholder="Java, Spring, Angular..." />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Projects</label>
+          <input [(ngModel)]="newEmployee.projects" placeholder="ERP, DCT..." />
+        </div>
+        <div class="form-group">
+          <label>Photo</label>
+          <div class="photo-upload" (click)="photoInput.click()">
+            <img *ngIf="newEmployee.avatar" [src]="newEmployee.avatar" class="photo-preview" />
+            <span *ngIf="!newEmployee.avatar">📷 Click to upload photo</span>
+          </div>
+          <input #photoInput type="file" accept="image/*" style="display:none" (change)="onPhotoSelected($event)" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeAddModal()">Cancel</button>
+        <button class="btn-add" (click)="addEmployee()">Add Employee</button>
+      </div>
+    </div>
+  </div>
+
+</div>

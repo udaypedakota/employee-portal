@@ -1,0 +1,469 @@
+<div class="bt-wrapper">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="brand-text">🥳 Party Tracker</span>
+    </div>
+    <div class="topbar-right">
+      <button class="back-btn" (click)="router.navigate(['/dashboard'])">← Dashboard</button>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="tabs">
+    <button [class.active]="activeTab === 'events'"      (click)="setTab('events')">🎉 Events</button>
+    <button [class.active]="activeTab === 'collections'" (click)="setTab('collections')">💰 Collections</button>
+    <button [class.active]="activeTab === 'expenses'"    (click)="setTab('expenses')">🧾 Expenses</button>
+    <button [class.active]="activeTab === 'reports'"     (click)="setTab('reports')">📊 Reports</button>
+  </nav>
+
+  <main class="main">
+
+    <!-- ══════════════ EVENTS TAB ══════════════ -->
+    <div *ngIf="activeTab === 'events'">
+      <div class="section-header">
+        <h2>🎉 Birthday Events</h2>
+        <button class="btn-primary" (click)="openEventModal()">➕ Add Event</button>
+      </div>
+
+      <div *ngIf="events.length === 0" class="empty-state">
+        <span>🎈</span><p>No birthday events yet. Add one to get started!</p>
+      </div>
+
+      <div class="event-grid">
+        <div class="event-card"
+          *ngFor="let e of sortedEvents"
+          [class.completed]="isPast(e.celebrationDate) && !isToday(e.birthDate || e.celebrationDate)"
+          [class.today-bday]="isToday(e.birthDate || e.celebrationDate)">
+
+          <!-- Today confetti -->
+          <div class="card-confetti" *ngIf="isToday(e.birthDate || e.celebrationDate)">
+            <span *ngFor="let i of [0,1,2,3,4,5,6,7,8,9]" class="cc" [style.left.%]="i*10" [style.animation-delay]="(i*0.2)+'s'"></span>
+          </div>
+
+          <div class="event-card-top">
+            <div class="event-avatar" [class.avatar-done]="isPast(e.celebrationDate) && !isToday(e.birthDate || e.celebrationDate)">
+              {{ e.employeeName.charAt(0) }}
+            </div>
+            <div class="event-info">
+              <strong>{{ e.employeeName }}</strong>
+              <span class="event-date">🎂 {{ e.celebrationDate | date:'dd MMM yyyy' }}</span>
+              <span class="today-badge" *ngIf="isToday(e.birthDate || e.celebrationDate)">🎉 Birthday Today!</span>
+              <span class="done-badge" *ngIf="isPast(e.celebrationDate) && !isToday(e.birthDate || e.celebrationDate)">✅ Completed</span>
+              <span class="event-note" *ngIf="e.notes">{{ e.notes }}</span>
+            </div>
+            <button class="icon-btn edit" (click)="openEditModal(e); $event.stopPropagation()">✏️</button>
+            <button class="icon-btn danger" (click)="askDelete('event', e.id, e.employeeName)">🗑</button>
+          </div>
+          <div class="event-card-stats">
+            <div class="mini-stat green"><span>Collected</span><strong>₹{{ svc.getSummary(e.id).totalCollected }}</strong></div>
+            <div class="mini-stat red"><span>Expense</span><strong>₹{{ svc.getSummary(e.id).totalExpense }}</strong></div>
+            <div class="mini-stat" [class.blue]="svc.getSummary(e.id).netBalance >= 0" [class.orange]="svc.getSummary(e.id).netBalance < 0">
+              <span>Net Balance</span><strong>₹{{ svc.getSummary(e.id).netBalance }}</strong>
+            </div>
+          </div>
+          <button class="btn-outline full-width"
+            [disabled]="isPast(e.celebrationDate) && !isToday(e.birthDate || e.celebrationDate)"
+            (click)="selectEvent(e.id)">
+            {{ isPast(e.celebrationDate) && !isToday(e.birthDate || e.celebrationDate) ? '✅ Celebration Done' : 'Manage →' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ COLLECTIONS TAB ══════════════ -->
+    <div *ngIf="activeTab === 'collections'">
+      <div class="section-header">
+        <h2>💰 Collections</h2>
+        <div class="header-actions">
+          <select class="event-select" [(ngModel)]="selectedEventId">
+            <option value="">— Select Event —</option>
+            <option *ngFor="let e of events" [value]="e.id">{{ e.employeeName }} ({{ e.celebrationDate | date:'dd MMM' }})</option>
+          </select>
+          <label class="amount-label">Fixed Amount: ₹</label>
+          <input type="number" class="amount-input" [(ngModel)]="fixedAmount" min="1" />
+        </div>
+      </div>
+
+      <div *ngIf="!selectedEventId" class="empty-state"><span>👆</span><p>Select an event to manage collections.</p></div>
+
+      <ng-container *ngIf="selectedEventId">
+        <!-- Summary Bar -->
+        <div class="summary-bar" *ngIf="selectedSummary as s">
+          <div class="sum-item blue" *ngIf="carryForwardDisplay > 0"><span>🔄 Carry Forward</span><strong>₹{{ carryForwardDisplay }}</strong></div>
+          <div class="sum-item green"><span>This Event Collected</span><strong>₹{{ totalCollectedDisplay }}</strong></div>
+          <div class="sum-item green"><span>Net Total</span><strong>₹{{ netTotalDisplay }}</strong></div>
+          <div class="sum-item red"><span>Expense</span><strong>₹{{ s.totalExpense }}</strong></div>
+          <div class="sum-item" [class.blue]="netBalanceDisplay >= 0" [class.orange]="netBalanceDisplay < 0">
+            <span>Net Balance</span><strong>₹{{ netBalanceDisplay }}</strong>
+          </div>
+          <div class="sum-item green"><span>✅ Paid</span><strong>{{ paidCount }}</strong></div>
+          <div class="sum-item orange"><span>⏳ Pending</span><strong>{{ pendingCount }}</strong></div>
+        </div>
+
+        <!-- Pay via QR -->
+        <div class="qr-section">
+          <div class="qr-header">
+            <span class="qr-title">📲 Pay Directly via UPI</span>
+            <span class="qr-sub">Click on QR code to enlarge and scan — Pay ₹{{ fixedAmount }}</span>
+          </div>
+          <div class="qr-cards">
+            <div class="qr-card" (click)="openQR('assets/images/Uday_Qr.png', 'Pedakota Uday Kumar')">
+              <div class="qr-img-wrap">
+                <img src="assets/images/Uday_Qr.png" alt="Uday QR" class="qr-img" />
+                <div class="qr-overlay">🔍 Tap to Scan</div>
+              </div>
+              <div class="qr-info">
+                <span class="qr-name">Pedakota Uday Kumar</span>
+                <span class="qr-role">Full-stack Developer</span>
+                <span class="qr-hint">📲 Scan to pay ₹{{ fixedAmount }}</span>
+              </div>
+            </div>
+            <div class="qr-card" (click)="openQR('assets/images/Prasana_Qr.png', 'Laxmi Prasanna Kumar S')">
+              <div class="qr-img-wrap">
+                <img src="assets/images/Prasana_Qr.png" alt="Prasanna QR" class="qr-img" />
+                <div class="qr-overlay">🔍 Tap to Scan</div>
+              </div>
+              <div class="qr-info">
+                <span class="qr-name">Laxmi Prasanna Kumar S</span>
+                <span class="qr-role">Full-stack Developer</span>
+                <span class="qr-hint">📲 Scan to pay ₹{{ fixedAmount }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- All Employees Collection Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Paid On</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of allEmployeeRows; let i = index"
+                  [class.row-paid]="row.contribution?.status === 'paid'"
+                  [class.row-pending]="!row.contribution || row.contribution.status === 'pending'">
+                <td>{{ i + 1 }}</td>
+                <td>
+                  <div class="emp-cell">
+                    <span class="emp-dot">{{ row.employee.name.charAt(0) }}</span>
+                    {{ row.employee.name }}
+                  </div>
+                </td>
+                <td class="dept">{{ row.employee.department }}</td>
+                <td class="amount">₹{{ fixedAmount }}</td>
+                <td>
+                  <button class="status-toggle"
+                    [class.paid]="row.contribution?.status === 'paid'"
+                    [class.not-paid]="!row.contribution || row.contribution.status === 'pending'"
+                    (click)="markEmployeePaid(row.employee.id, row.employee.name, row.contribution?.status === 'paid' ? 'pending' : 'paid')">
+                    {{ row.contribution?.status === 'paid' ? '✅ Paid' : '⏳ Pending' }}
+                  </button>
+                </td>
+                <td class="paid-on">{{ row.contribution?.status === 'paid' ? (row.contribution?.paidOn | date:'dd MMM yyyy') : '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- ══════════════ EXPENSES TAB ══════════════ -->
+    <div *ngIf="activeTab === 'expenses'">
+      <div class="section-header">
+        <h2>🧾 Expenses</h2>
+        <div class="header-actions">
+          <select class="event-select" [(ngModel)]="selectedEventId">
+            <option value="">— Select Event —</option>
+            <option *ngFor="let e of events" [value]="e.id">{{ e.employeeName }} ({{ e.celebrationDate | date:'dd MMM' }})</option>
+          </select>
+          <button class="btn-primary" (click)="openExpenseModal()" [disabled]="!selectedEventId">➕ Add</button>
+        </div>
+      </div>
+
+      <div *ngIf="!selectedEventId" class="empty-state"><span>👆</span><p>Select an event to manage expenses.</p></div>
+
+      <ng-container *ngIf="selectedSummary as s">
+        <div class="summary-bar">
+          <div class="sum-item blue" *ngIf="s.carryForward > 0"><span>🔄 Carry Forward</span><strong>₹{{ s.carryForward }}</strong></div>
+          <div class="sum-item green"><span>Collected</span><strong>₹{{ s.totalCollected }}</strong></div>
+          <div class="sum-item green"><span>Net Total</span><strong>₹{{ s.netTotal }}</strong></div>
+          <div class="sum-item red"><span>Total Expense</span><strong>₹{{ s.totalExpense }}</strong></div>
+          <div class="sum-item" [class.blue]="s.netBalance >= 0" [class.orange]="s.netBalance < 0">
+            <span>Balance</span><strong>₹{{ s.netBalance }}</strong>
+          </div>
+        </div>
+
+        <div *ngIf="s.expenses.length === 0" class="empty-state"><span>🧾</span><p>No expenses recorded yet.</p></div>
+        <div class="table-wrap" *ngIf="s.expenses.length > 0">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Category</th><th>Description</th><th>Amount</th><th>Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let x of s.expenses; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td><span class="cat-badge">{{ categoryIcon(x.category) }} {{ x.category }}</span></td>
+                <td>{{ x.description }}</td>
+                <td class="amount">₹{{ x.amount }}</td>
+                <td>{{ x.date | date:'dd MMM yyyy' }}</td>
+                <td><button class="icon-btn danger" (click)="askDelete('expense', x.id, x.description)">🗑</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- ══════════════ REPORTS TAB ══════════════ -->
+    <div *ngIf="activeTab === 'reports'">
+      <div class="section-header">
+        <h2>📊 Monthly Reports</h2>
+        <div class="header-actions">
+          <input type="month" class="month-input" [(ngModel)]="reportMonth" />
+          <button class="btn-outline" (click)="reportMonth = ''">Clear</button>
+        </div>
+      </div>
+
+      <!-- KPI Strip -->
+      <div class="summary-bar">
+        <div class="sum-item green"><span>Total Collected</span><strong>₹{{ reportTotals.collected }}</strong></div>
+        <div class="sum-item red"><span>Total Expense</span><strong>₹{{ reportTotals.expense }}</strong></div>
+        <div class="sum-item" [class.blue]="reportTotals.balance >= 0" [class.orange]="reportTotals.balance < 0">
+          <span>Net Balance</span><strong>₹{{ reportTotals.balance }}</strong>
+        </div>
+        <div class="sum-item purple"><span>Events</span><strong>{{ filteredSummaries.length }}</strong></div>
+      </div>
+
+      <div *ngIf="filteredSummaries.length === 0" class="empty-state"><span>📭</span><p>No events found for selected period.</p></div>
+
+      <ng-container *ngIf="filteredSummaries.length > 0">
+
+        <!-- ① Grouped Bar Chart: Collected vs Expense per person -->
+        <div class="chart-card">
+          <div class="chart-title">💰 Collected vs Expense — Per Person</div>
+          <div class="chart-legend">
+            <span class="legend-dot" style="background:#22c55e"></span> Collected &nbsp;
+            <span class="legend-dot" style="background:#ef4444"></span> Expense
+          </div>
+          <div class="bar-chart-scroll">
+            <div class="bar-chart">
+              <div class="bar-group" *ngFor="let d of chartData">
+                <div class="bars">
+                  <div class="bar collected" [style.height.px]="d.collectedH" [title]="'Collected: ₹' + d.collected">
+                    <span class="bar-val" *ngIf="d.collected > 0">₹{{ d.collected }}</span>
+                  </div>
+                  <div class="bar expense" [style.height.px]="d.expenseH" [title]="'Expense: ₹' + d.expense">
+                    <span class="bar-val" *ngIf="d.expense > 0">₹{{ d.expense }}</span>
+                  </div>
+                </div>
+                <div class="bar-label" [title]="d.fullName">{{ d.name }}</div>
+                <div class="bar-date">{{ d.date | date:'dd MMM' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ② Expense Category Breakdown — only events that HAVE expenses -->
+        <ng-container *ngFor="let d of chartData">
+          <div class="chart-card" *ngIf="d.categories.length > 0">
+            <div class="chart-card-header">
+              <div class="report-avatar">{{ d.fullName.charAt(0) }}</div>
+              <div>
+                <div class="chart-person-name">{{ d.fullName }}</div>
+                <span class="event-date">{{ d.date | date:'dd MMM yyyy' }}</span>
+              </div>
+              <div class="chart-balance" [class.pos]="d.balance >= 0" [class.neg]="d.balance < 0">
+                Balance: ₹{{ d.balance }}
+              </div>
+            </div>
+            <div class="cat-bars">
+              <div class="cat-bar-row" *ngFor="let c of d.categories">
+                <span class="cat-bar-label">{{ categoryIcon(c.cat) }} {{ c.cat }}</span>
+                <div class="cat-bar-track">
+                  <div class="cat-bar-fill"
+                    [style.width.%]="(c.amt / d.totalExpense) * 100"
+                    [style.background]="catColor(c.cat)"></div>
+                </div>
+                <span class="cat-bar-amt">₹{{ c.amt }}</span>
+                <span class="cat-bar-pct">{{ ((c.amt / d.totalExpense) * 100) | number:'1.0-0' }}%</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+      </ng-container>
+    </div>
+
+  </main>
+
+  <!-- ══ Add Event Modal ══ -->
+  <div class="modal-overlay" *ngIf="showEventModal" (click)="showEventModal = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header"><h3>🎉 Add Birthday Event</h3><button class="modal-close" (click)="showEventModal = false">✕</button></div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Employee *</label>
+          <select [(ngModel)]="newEvent.employeeId">
+            <option value="">Select employee</option>
+            <option *ngFor="let e of employees" [value]="e.id">{{ e.name }} ({{ e.id }})</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Birth Date</label>
+            <input type="date" [(ngModel)]="newEvent.birthDate" />
+          </div>
+          <div class="form-group">
+            <label>Celebration Date *</label>
+            <input type="date" [(ngModel)]="newEvent.celebrationDate" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input [(ngModel)]="newEvent.notes" placeholder="e.g. Surprise party" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showEventModal = false">Cancel</button>
+        <button class="btn-primary" (click)="saveEvent()">Save Event</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Add Contribution Modal ══ -->
+  <div class="modal-overlay" *ngIf="showContribModal" (click)="showContribModal = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header"><h3>💰 Add Contribution</h3><button class="modal-close" (click)="showContribModal = false">✕</button></div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Contributor Name *</label>
+          <input [(ngModel)]="newContrib.contributorName" placeholder="Employee name" list="emp-list" />
+          <datalist id="emp-list">
+            <option *ngFor="let e of employees" [value]="e.name"></option>
+          </datalist>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input type="number" [(ngModel)]="newContrib.amount" placeholder="e.g. 50" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" [(ngModel)]="newContrib.paidOn" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="newContrib.status">
+            <option value="paid">✅ Paid</option>
+            <option value="pending">⏳ Pending</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showContribModal = false">Cancel</button>
+        <button class="btn-primary" (click)="saveContrib()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Add Expense Modal ══ -->
+  <div class="modal-overlay" *ngIf="showExpenseModal" (click)="showExpenseModal = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header"><h3>🧾 Add Expense</h3><button class="modal-close" (click)="showExpenseModal = false">✕</button></div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category *</label>
+            <select [(ngModel)]="newExpense.category">
+              <option *ngFor="let c of expenseCategories" [value]="c">{{ categoryIcon(c) }} {{ c }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input type="number" [(ngModel)]="newExpense.amount" placeholder="e.g. 500" min="1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description *</label>
+          <input [(ngModel)]="newExpense.description" placeholder="e.g. Black Forest Cake 1kg" />
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" [(ngModel)]="newExpense.date" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showExpenseModal = false">Cancel</button>
+        <button class="btn-primary" (click)="saveExpense()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ QR Fullscreen Modal ══ -->
+  <div class="modal-overlay" *ngIf="showQRModal" (click)="showQRModal = false">
+    <div class="qr-modal" (click)="$event.stopPropagation()">
+      <div class="qr-modal-header">
+        <span>📲 Scan to Pay ₹{{ fixedAmount }}</span>
+        <button class="modal-close" (click)="showQRModal = false">✕</button>
+      </div>
+      <img [src]="activeQRImage" [alt]="activeQRName" class="qr-modal-img" />
+      <div class="qr-modal-name">{{ activeQRName }}</div>
+      <div class="qr-modal-hint">Open your UPI app → Scan QR → Pay ₹{{ fixedAmount }}</div>
+    </div>
+  </div>
+
+  <!-- ══ Edit Event Modal ══ -->
+  <div class="modal-overlay" *ngIf="showEditModal" (click)="showEditModal = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header"><h3>✏️ Edit Birthday Event</h3><button class="modal-close" (click)="showEditModal = false">✕</button></div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Employee</label>
+          <input [value]="editEvent.employeeName" disabled style="background:#f1f5f9;color:#94a3b8" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Birth Date</label>
+            <input type="date" [(ngModel)]="editEvent.birthDate" />
+          </div>
+          <div class="form-group">
+            <label>Celebration Date *</label>
+            <input type="date" [(ngModel)]="editEvent.celebrationDate" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input [(ngModel)]="editEvent.notes" placeholder="e.g. Surprise party" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showEditModal = false">Cancel</button>
+        <button class="btn-primary" (click)="saveEditEvent()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Delete Confirm Modal ══ -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="showDeleteModal = false">
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+      <div class="delete-modal-icon">🗑️</div>
+      <h3>Confirm Delete</h3>
+      <p>Are you sure you want to delete <strong>{{ deleteTargetLabel }}</strong>?</p>
+      <div class="delete-modal-actions">
+        <button class="btn-cancel" (click)="showDeleteModal = false">Cancel</button>
+        <button class="btn-delete-confirm" (click)="confirmDelete()">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+</div>
