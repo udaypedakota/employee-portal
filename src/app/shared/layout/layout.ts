@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { EMPLOYEES, Employee } from '../../employee/employee.data';
@@ -23,6 +23,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.update();
     this.timer = setInterval(() => this.update(), 1000);
     this.loadEmployee();
+    const theme = localStorage.getItem('app_theme');
+    document.body.classList.toggle('theme-light', theme === 'light');
   }
 
   ngOnDestroy() { clearInterval(this.timer); }
@@ -62,6 +64,41 @@ export class LayoutComponent implements OnInit, OnDestroy {
     if (!this.isAdmin && this.loggedInEmployee) {
       this.router.navigate(['/my-profile']);
     }
+  }
+
+  sidebarOpen = false;
+  messagesOpen = false;
+  notificationsOpen = false;
+
+  messages = [
+    { initials: 'BK', name: 'Balakrishna', text: 'Please update your timesheet.', time: '9:30 am', color: '#6366f1' },
+    { initials: 'NK', name: 'Navya Sree', text: 'DCT module review done ✅', time: 'Yesterday', color: '#10b981' },
+    { initials: 'SK', name: 'Siva Kumar', text: 'Can you join the standup?', time: 'Mon', color: '#f59e0b' },
+  ];
+
+  notifications = [
+    { icon: '🎂', bg: '#fef3c7', title: 'Birthday Today!', sub: 'Wish your teammate a happy birthday', time: 'Now' },
+    { icon: '🗓️', bg: '#eff6ff', title: 'Holiday Tomorrow', sub: 'Office closed — check holiday calendar', time: '1h ago' },
+    { icon: '📋', bg: '#f0fdf4', title: 'Project Update', sub: 'DCT migration task marked complete', time: '3h ago' },
+    { icon: '👤', bg: '#f5f3ff', title: 'New Employee Added', sub: 'Sai Teja joined UI Development', time: 'Yesterday' },
+  ];
+
+  toggleMessages(e: MouseEvent) {
+    e.stopPropagation();
+    this.notificationsOpen = false;
+    this.messagesOpen = !this.messagesOpen;
+  }
+
+  toggleNotifications(e: MouseEvent) {
+    e.stopPropagation();
+    this.messagesOpen = false;
+    this.notificationsOpen = !this.notificationsOpen;
+  }
+
+  @HostListener('document:click')
+  closeDropdowns() {
+    this.messagesOpen = false;
+    this.notificationsOpen = false;
   }
 
   logout() { 

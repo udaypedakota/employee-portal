@@ -10,7 +10,7 @@
       </div>
     </div>
 
-<!-- Stat Cards -->
+    <!-- Stat Cards -->
     <div class="stats-grid">
       <div class="stat-card" *ngFor="let s of stats" [style.--accent]="s.color" [style.--bg]="s.bg">
         <div class="stat-icon" [style.background]="s.bg" [style.color]="s.color">{{ s.icon }}</div>
@@ -105,7 +105,6 @@
             <span class="chevron" [class.rotated]="activeTeam === t.role">›</span>
           </div>
           <div class="member-list" *ngIf="activeTeam === t.role">
-            <!-- Real employees with click navigation -->
             <ng-container *ngIf="t.employees.length > 0">
               <div class="member-chip clickable" *ngFor="let e of t.employees" (click)="viewEmployee(e.id)">
                 <span class="chip-avatar" [style.background]="t.color + '22'" [style.color]="t.color">{{ e.name.charAt(0) }}</span>
@@ -117,7 +116,6 @@
                 <button class="delete-btn" (click)="$event.stopPropagation(); deleteEmployee(e.id)">🗑</button>
               </div>
             </ng-container>
-            <!-- Placeholder chips for teams without data yet -->
             <ng-container *ngIf="t.employees.length === 0">
               <span class="member-chip coming-soon">🔜 Data coming soon</span>
             </ng-container>
@@ -128,33 +126,7 @@
     </div>
   </main>
 
-  <!-- Birthday Notification - Fixed floating bottom-right -->
-  <div class="bday-notification" *ngIf="todayBirthdays.length > 0">
-    <div class="bday-notif-card" *ngFor="let b of todayBirthdays; let i = index"
-      [style.bottom]="(24 + i * 110) + 'px'"
-      (click)="viewEmployee(b.id)">
-      <div class="confetti-wrap">
-        <span class="confetti" *ngFor="let c of confettiItems"
-          [style.left.%]="(c * 37) % 100"
-          [style.animation-delay]="(c * 0.15) + 's'"
-          [style.background]="['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff922b','#cc5de8'][(c % 6)]">
-        </span>
-      </div>
-      <div class="bday-notif-inner">
-        <div class="bday-notif-avatar">
-          <img *ngIf="b.avatar" [src]="b.avatar" [alt]="b.name"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
-          <span [style.display]="b.avatar ? 'none' : 'flex'">{{ b.name.charAt(0) }}</span>
-        </div>
-        <div class="bday-notif-info">
-          <span class="bday-notif-tag">🎉 Birthday Today!</span>
-          <strong>{{ b.name }}</strong>
-          <span>{{ b.role }}</span>
-        </div>
-        <span class="bday-notif-wave">👋</span>
-      </div>
-    </div>
-  </div>
+  <!-- Delete Modal -->
   <div class="modal-overlay" *ngIf="showDeleteModal" (click)="showDeleteModal = false">
     <div class="delete-modal" (click)="$event.stopPropagation()">
       <div class="delete-modal-icon">🗑️</div>

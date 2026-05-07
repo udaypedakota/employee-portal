@@ -1,0 +1,120 @@
+<div class="settings-page">
+
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <span class="page-icon">⚙️</span>
+      <div>
+        <h2>Settings</h2>
+        <p>Manage your account preferences</p>
+      </div>
+    </div>
+    <div class="save-toast" *ngIf="saved">✅ Settings saved!</div>
+  </div>
+
+  <div class="settings-grid">
+
+    <!-- Profile Section -->
+    <div class="settings-card full-width">
+      <div class="card-header">
+        <span class="card-icon">👤</span>
+        <div>
+          <strong>Profile Info</strong>
+          <span>Your account details</span>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Display Name</label>
+          <input [(ngModel)]="displayName" [disabled]="true" />
+        </div>
+        <div class="field-group">
+          <label>Email</label>
+          <input [(ngModel)]="email" [disabled]="true" />
+        </div>
+      </div>
+      <p class="field-hint">Contact your admin to update profile details.</p>
+    </div>
+
+    <!-- Appearance Section -->
+    <div class="settings-card">
+      <div class="card-header">
+        <span class="card-icon">🎨</span>
+        <div>
+          <strong>Appearance</strong>
+          <span>Customize the portal look</span>
+        </div>
+      </div>
+      <div class="theme-row">
+        <div class="theme-option" [class.selected]="theme === 'dark'" (click)="applyTheme('dark')">
+          <div class="theme-preview dark-preview">
+            <div class="tp-sidebar"></div>
+            <div class="tp-content">
+              <div class="tp-bar"></div>
+              <div class="tp-bar short"></div>
+            </div>
+          </div>
+          <span>Dark</span>
+          <span class="theme-check" *ngIf="theme === 'dark'">✓</span>
+        </div>
+        <div class="theme-option" [class.selected]="theme === 'light'" (click)="applyTheme('light')">
+          <div class="theme-preview light-preview">
+            <div class="tp-sidebar"></div>
+            <div class="tp-content">
+              <div class="tp-bar"></div>
+              <div class="tp-bar short"></div>
+            </div>
+          </div>
+          <span>Light</span>
+          <span class="theme-check" *ngIf="theme === 'light'">✓</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications Section -->
+    <div class="settings-card">
+      <div class="card-header">
+        <span class="card-icon">🔔</span>
+        <div>
+          <strong>Notifications</strong>
+          <span>Choose what alerts you receive</span>
+        </div>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">🎂 Birthday Reminders</span>
+          <span class="toggle-desc">Get notified when a teammate has a birthday</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="notifyBirthday" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">🗓️ Holiday Alerts</span>
+          <span class="toggle-desc">Upcoming public holiday notifications</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="notifyHoliday" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-label">📋 Project Updates</span>
+          <span class="toggle-desc">Alerts for project allocation changes</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="notifyProject" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="save-row">
+    <button class="save-btn" (click)="saveSettings()">Save Changes</button>
+  </div>
+
+</div>

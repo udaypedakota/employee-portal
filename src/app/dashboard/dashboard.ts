@@ -1,100 +1,65 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Employee } from '../employee/employee.data';
 import { EmployeeService } from '../employee/employee.service';
-import { BirthdayFundService } from '../birthday-tracker/birthday-fund.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
-export class Dashboard implements OnInit, OnDestroy {
-  constructor(public router: Router, private employeeService: EmployeeService, private birthdaySvc: BirthdayFundService) { }
+export class Dashboard implements OnInit {
+  constructor(public router: Router, private employeeService: EmployeeService) { }
 
   get greeting() {
     const h = new Date().getHours();
-    const name = localStorage.getItem('loggedInUser') || 'Admin';
     const time = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    const id = localStorage.getItem('loggedInEmployeeId');
+    let name = 'Admin';
+    if (id && id !== 'ADMIN') {
+      const emp = this.employeeService.getAll().find(e => e.id === id);
+      if (emp) {
+        const parts = emp.name.split(' ');
+        name = parts[1] || parts[0];
+      }
+    }
     return `${time}, ${name}`;
   }
-
-  today = '';
-  currentTime = '';
-  private timer: any;
-
-  // ── Birthday notification ──
-  todayBirthdays: { name: string; role: string; department: string; avatar?: string; gender?: string; id: string }[] = [];
-  confettiItems = Array.from({ length: 30 }, (_, i) => i);
-
-  loadTodayBirthdays() {
-    const today = new Date();
-    const todayMMDD = `${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-    const employees = this.employeeService.getAll();
-    this.birthdaySvc.seedEvents().subscribe(events => {
-      this.todayBirthdays = events
-        .filter(e => (e.birthDate || '').slice(5) === todayMMDD)
-        .map(e => {
-          const emp = employees.find(x => x.id === e.employeeId);
-          return { id: e.employeeId, name: e.employeeName, role: emp?.role || '', department: emp?.department || '', avatar: emp?.avatar, gender: emp?.gender };
-        });
-    });
-  }
-
-  fullStackDevs: Employee[] = [];
-  testers: Employee[] = [];
-  uiDevs: Employee[] = [];
-  designers: Employee[] = [];
-  network: Employee[] = [];
 
   stats: { label: string; value: number; icon: string; color: string; bg: string }[] = [];
   teams: { role: string; count: number; icon: string; color: string; employees: Employee[] }[] = [];
 
   ngOnInit() {
-    this.updateDateTime();
-    this.timer = setInterval(() => this.updateDateTime(), 1000);
-    this.employeeService.load().subscribe(() => {
-      this.refreshTeams();
-      this.loadTodayBirthdays();
-    });
-  }
-
-  ngOnDestroy() { clearInterval(this.timer); }
-
-  updateDateTime() {
-    const now = new Date();
-    this.today = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    this.currentTime = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    this.refreshTeams();
   }
 
   refreshTeams() {
     const all = this.employeeService.getAll();
-    this.fullStackDevs = all.filter(e => e.role === 'Full-stack Developer');
-    this.testers = all.filter(e => e.role === 'Tester');
-    this.uiDevs = all.filter(e => e.role === 'UI Developer');
-    this.designers = all.filter(e => e.role === 'UI/UX Designer');
-    this.network = all.filter(e => e.role === 'Network');
+    const fullStack = all.filter(e => e.role === 'Full-stack Developer');
+    const testers = all.filter(e => e.role === 'Tester');
+    const uiDevs = all.filter(e => e.role === 'UI Developer');
+    const designers = all.filter(e => e.role === 'UI/UX Designer');
+    const network = all.filter(e => e.role === 'Network');
 
     this.stats = [
       { label: 'Total Members', value: all.length, icon: '👥', color: '#0055a5', bg: '#e8f1fb' },
-      { label: 'Full Stack Devs', value: this.fullStackDevs.length, icon: '💻', color: '#00897b', bg: '#e0f5f2' },
-      { label: 'Testers', value: this.testers.length, icon: '🧪', color: '#f57c00', bg: '#fff3e0' },
-      { label: 'UX / UI Design', value: this.designers.length, icon: '🎨', color: '#8e24aa', bg: '#f3e5f5' },
-      { label: 'UI Developers', value: this.uiDevs.length, icon: '🖥️', color: '#e53935', bg: '#fce4ec' },
-      { label: 'Network / DevOps', value: this.network.length, icon: '🌐', color: '#00695c', bg: '#e0f2f1' },
+      { label: 'Full Stack Devs', value: fullStack.length, icon: '💻', color: '#00897b', bg: '#e0f5f2' },
+      { label: 'Testers', value: testers.length, icon: '🧪', color: '#f57c00', bg: '#fff3e0' },
+      { label: 'UX / UI Design', value: designers.length, icon: '🎨', color: '#8e24aa', bg: '#f3e5f5' },
+      { label: 'UI Developers', value: uiDevs.length, icon: '🖥️', color: '#e53935', bg: '#fce4ec' },
+      { label: 'Network / DevOps', value: network.length, icon: '🌐', color: '#00695c', bg: '#e0f2f1' },
     ];
 
     this.teams = [
-      { role: 'Full Stack Developers', icon: '💻', color: '#0055a5', count: this.fullStackDevs.length, employees: this.fullStackDevs },
-      { role: 'Testers', icon: '🧪', color: '#f57c00', count: this.testers.length, employees: this.testers },
-      { role: 'UX / UI Designers', icon: '🎨', color: '#8e24aa', count: this.designers.length, employees: this.designers },
-      { role: 'UI Developers', icon: '🖥️', color: '#e53935', count: this.uiDevs.length, employees: this.uiDevs },
-      { role: 'Network / DevOps', icon: '🌐', color: '#00695c', count: this.network.length, employees: this.network },
+      { role: 'Full Stack Developers', icon: '💻', color: '#0055a5', count: fullStack.length, employees: fullStack },
+      { role: 'Testers', icon: '🧪', color: '#f57c00', count: testers.length, employees: testers },
+      { role: 'UX / UI Designers', icon: '🎨', color: '#8e24aa', count: designers.length, employees: designers },
+      { role: 'UI Developers', icon: '🖥️', color: '#e53935', count: uiDevs.length, employees: uiDevs },
+      { role: 'Network / DevOps', icon: '🌐', color: '#00695c', count: network.length, employees: network },
     ];
   }
 
@@ -103,10 +68,6 @@ export class Dashboard implements OnInit, OnDestroy {
 
   selectSegment(team: typeof this.teams[0]) {
     this.selectedTeam = this.selectedTeam?.role === team.role ? null : team;
-  }
-
-  get manager() {
-    return this.employeeService.getAll().find(e => e.role === 'Project Manager');
   }
 
   showAddModal = false;
@@ -156,9 +117,5 @@ export class Dashboard implements OnInit, OnDestroy {
 
   toggleTeam(role: string) {
     this.activeTeam = this.activeTeam === role ? null : role;
-  }
-
-  logout() {
-    this.router.navigate(['/login']);
   }
 }

@@ -1,0 +1,64 @@
+<div class="help-page">
+
+  <div class="page-header">
+    <span class="page-icon">❓</span>
+    <div>
+      <h2>Help Center</h2>
+      <p>Find answers and get support</p>
+    </div>
+  </div>
+
+  <div class="help-grid">
+
+    <!-- FAQ - left column -->
+    <div class="help-card">
+      <div class="card-header">
+        <span class="card-icon">💬</span>
+        <div>
+          <strong>Frequently Asked Questions</strong>
+          <span>Click a question to expand</span>
+        </div>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item" *ngFor="let f of faqs; let i = index" [class.open]="openIndex === i">
+          <div class="faq-question" (click)="toggle(i)">
+            <span>{{ f.q }}</span>
+            <span class="faq-chevron" [class.rotated]="openIndex === i">›</span>
+          </div>
+          <div class="faq-answer" *ngIf="openIndex === i">{{ f.a }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Contact + Info -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+
+      <div class="help-card">
+        <div class="card-header">
+          <span class="card-icon">📧</span>
+          <div>
+            <strong>Contact & Support</strong>
+            <span>Reach out to the team</span>
+          </div>
+        </div>
+        <div class="contact-list">
+          <div class="contact-card" *ngFor="let c of contacts">
+            <span class="contact-icon">{{ c.icon }}</span>
+            <div>
+              <span class="contact-label">{{ c.label }}</span>
+              <span class="contact-value">{{ c.value }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-banner">
+        <span>💡</span>
+        <p>For urgent issues, contact your system administrator directly. Portal support hours are <strong>Mon–Fri, 9am–6pm IST</strong>.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

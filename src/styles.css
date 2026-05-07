@@ -41,6 +41,22 @@
   --shadow-glow: 0 0 24px rgba(99,102,241,0.25);
 }
 
+/* ── Light Theme ── */
+body.theme-light {
+  --bg:             #f0f4f8;
+  --surface:        #ffffff;
+  --surface-2:      #e8edf3;
+  --border:         #d1d9e0;
+  --border-light:   #e8edf3;
+  --text-primary:   #0f172a;
+  --text-secondary: #374151;
+  --text-muted:     #6b7280;
+  --sidebar-bg:     #1e293b;
+  --topbar-bg:      linear-gradient(135deg, #1e293b 0%, #2d3a4f 50%, #3b4a6b 100%);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.06);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
