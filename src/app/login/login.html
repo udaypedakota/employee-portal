@@ -2,14 +2,33 @@
 
   <!-- Left Panel -->
   <div class="left-panel">
+    <div class="grid-overlay"></div>
     <div class="left-content">
-      <div class="brand-fallback">
-        <span class="brand-icon">💡</span>
-        <span class="brand-name">Intellect</span>
+      <div class="brand-row">
+        <img src="assets/unite.png" class="brand-logo-img" alt="Intellect" />
+        <div>
+          <div class="brand-name">Intellect Informatics</div>
+          <div class="brand-tagline">Enterprise Solutions</div>
+        </div>
       </div>
-      <h1>Welcome to<br/><span>Intellect Portal</span></h1>
-      <p>Your unified workspace for team collaboration, project tracking, and performance insights.</p>
 
+      <h1>Your Team,<br/><span class="highlight">One Portal.</span></h1>
+      <p>Unified workspace for team collaboration, project tracking, work status monitoring, and performance insights — all in one place.</p>
+
+      <div class="stats-row">
+        <div class="stat-pill">
+          <strong>38+</strong>
+          <span>Team Members</span>
+        </div>
+        <div class="stat-pill">
+          <strong>5</strong>
+          <span>Departments</span>
+        </div>
+        <div class="stat-pill">
+          <strong>100%</strong>
+          <span>Uptime</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -17,19 +36,17 @@
   <div class="right-panel">
     <div class="login-card">
       <div class="card-header">
-        <img src="assets/intellect-logo.jpg"
-             alt="Intellect" class="card-logo"
-             onerror="this.style.display='none'" />
-        <h2>Sign In</h2>
-        <p>Access your Intellect workspace</p>
+        <img src="assets/unite.png" class="card-logo-img" alt="Intellect" />
+        <h2>Welcome Back</h2>
+        <p>Sign in to your workspace</p>
       </div>
 
-      <div class="error-msg" *ngIf="errorMsg">⚠ {{ errorMsg }}</div>
+      <div class="error-msg" *ngIf="errorMsg">⚠️ {{ errorMsg }}</div>
 
       <div class="form-group">
         <label>Email Address</label>
         <div class="input-wrap">
-          <span class="icon">✉</span>
+          <span class="input-icon">✉️</span>
           <input type="text" [(ngModel)]="username" placeholder="you@intellectinfo.com" (keyup.enter)="login()" />
         </div>
       </div>
@@ -37,15 +54,15 @@
       <div class="form-group">
         <label>Password</label>
         <div class="input-wrap">
-          <span class="icon">🔒</span>
-          <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" placeholder="Enter password" (keyup.enter)="login()" />
+          <span class="input-icon">🔒</span>
+          <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" placeholder="Enter your password" (keyup.enter)="login()" />
           <span class="toggle-eye" (click)="showPassword = !showPassword">{{ showPassword ? '🙈' : '👁️' }}</span>
         </div>
       </div>
 
       <button class="login-btn" (click)="login()">Sign In →</button>
 
-      <div class="hint">Authorized personnel only</div>
+      <div class="hint">🔒 Authorized personnel only</div>
       <div class="footer">© 2025 Intellect Information Technologies. All rights reserved.</div>
     </div>
   </div>

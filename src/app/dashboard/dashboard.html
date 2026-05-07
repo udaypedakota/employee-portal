@@ -1,22 +1,5 @@
 <div class="dash-wrapper">
 
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <span class="brand-text">💡 Intellect Informatics</span>
-      <span class="divider"></span>
-      <span class="portal-name">Employee Portal</span>
-    </div>
-    <div class="topbar-right">
-      <span class="date-badge">📅 {{ today }} &nbsp; 🕐 {{ currentTime }}</span>
-      <button class="work-status-btn" (click)="router.navigate(['/work-status'])">📊 Work Status</button>
-      <button class="work-status-btn" (click)="router.navigate(['/birthday-tracker'])">🥳 Party Tracker</button>
-      <button class="add-emp-btn" (click)="openAddModal()">➕ Add Employee</button>
-      <button class="logout-btn" (click)="logout()">⏻ Logout</button>
-    </div>
-  </header>
-
-  <!-- Main -->
   <main class="main">
 
     <!-- Welcome -->
@@ -27,18 +10,7 @@
       </div>
     </div>
 
-    <!-- Project Manager Card -->
-    <div class="pm-card" *ngIf="manager" (click)="viewEmployee(manager.id)">
-      <div class="pm-avatar">{{ manager.name.charAt(0) }}</div>
-      <div class="pm-info">
-        <span class="pm-tag">Project Manager</span>
-        <h4>{{ manager.name }}</h4>
-        <span class="pm-id">{{ manager.id }}</span>
-      </div>
-      <span class="pm-arrow">→</span>
-    </div>
-
-    <!-- Stat Cards -->
+<!-- Stat Cards -->
     <div class="stats-grid">
       <div class="stat-card" *ngFor="let s of stats" [style.--accent]="s.color" [style.--bg]="s.bg">
         <div class="stat-icon" [style.background]="s.bg" [style.color]="s.color">{{ s.icon }}</div>

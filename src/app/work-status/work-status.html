@@ -1,204 +1,79 @@
 <div class="ws-wrapper">
+  <div class="main">
 
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <span class="brand-text">💡 Intellect</span>
-      <span class="divider"></span>
-      <span class="portal-name">Work Status Tracker</span>
-    </div>
-    <button class="back-btn" (click)="goBack()">← Dashboard</button>
-  </header>
-
-  <main class="main">
-
-    <!-- Page Title -->
-    <div class="page-title">
+    <!-- Page Header -->
+    <div class="page-header">
       <div>
-        <h2>Employee Work Status</h2>
-        <p>Real-time overview of what every team member is working on</p>
+        <h2>Project Allocations</h2>
+        <p>Employee project assignments with start and end dates</p>
       </div>
-    </div>
-
-    <!-- Summary Cards -->
-    <div class="summary-grid">
-      <div class="sum-card" style="--c:#0055a5;--bg:#e8f1fb">
-        <span class="sum-icon">👥</span>
-        <div>
-          <span class="sum-val">{{ summary.total }}</span>
-          <span class="sum-label">Total</span>
-        </div>
-      </div>
-      <div class="sum-card" style="--c:#0055a5;--bg:#dbeafe">
-        <span class="sum-icon">⚙️</span>
-        <div>
-          <span class="sum-val">{{ summary.inProgress }}</span>
-          <span class="sum-label">In Progress</span>
-        </div>
-      </div>
-      <div class="sum-card" style="--c:#f57c00;--bg:#fff3e0">
-        <span class="sum-icon">🔍</span>
-        <div>
-          <span class="sum-val">{{ summary.review }}</span>
-          <span class="sum-label">In Review</span>
-        </div>
-      </div>
-      <div class="sum-card" style="--c:#00897b;--bg:#e0f5f2">
-        <span class="sum-icon">✅</span>
-        <div>
-          <span class="sum-val">{{ summary.completed }}</span>
-          <span class="sum-label">Completed</span>
-        </div>
-      </div>
-      <div class="sum-card" style="--c:#e53935;--bg:#fce4ec">
-        <span class="sum-icon">⏸️</span>
-        <div>
-          <span class="sum-val">{{ summary.onHold }}</span>
-          <span class="sum-label">On Hold</span>
-        </div>
-      </div>
+      <div class="total-badge">{{ filtered.length }} Allocations</div>
     </div>
 
     <!-- Filters -->
     <div class="filters-bar">
-      <input class="search-input" [(ngModel)]="searchQuery" placeholder="🔍 Search employee, project, task..." />
-      <div class="filter-group">
-        <label>Status</label>
-        <select [(ngModel)]="filterStatus">
-          <option *ngFor="let s of statuses">{{ s }}</option>
-        </select>
-      </div>
+      <input class="search-input" [(ngModel)]="searchQuery" placeholder="🔍 Search employee or project..." />
       <div class="filter-group">
         <label>Project</label>
         <select [(ngModel)]="filterProject">
           <option *ngFor="let p of projects">{{ p }}</option>
         </select>
       </div>
+      <div class="filter-group">
+        <label>Role</label>
+        <select [(ngModel)]="filterRole">
+          <option *ngFor="let r of roles">{{ r }}</option>
+        </select>
+      </div>
     </div>
 
     <!-- Table -->
     <div class="table-card">
-      <table class="ws-table">
+      <table class="alloc-table">
         <thead>
           <tr>
+            <th>#</th>
             <th>Employee</th>
             <th>Project</th>
-            <th>Current Task</th>
-            <th>Priority</th>
-            <th>Progress</th>
+            <th>Role</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Duration</th>
             <th>Status</th>
-            <th>Due Date</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let row of rows">
-            <tr class="data-row" (click)="viewEmployee(row.employeeId)">
-              <td>
-                <div class="emp-cell">
-                  <div class="emp-avatar">
-                    <img *ngIf="row.employee?.avatar" [src]="row.employee!.avatar" class="avatar-img" />
-                    <span *ngIf="!row.employee?.avatar">{{ row.employee?.name?.charAt(0) }}</span>
-                  </div>
-                  <div>
-                    <span class="emp-name">{{ row.employee?.name }}</span>
-                    <span class="emp-role">{{ row.employee?.role }}</span>
-                  </div>
+          <tr *ngFor="let a of filtered; let i = index" class="data-row" (click)="viewEmployee(a.employeeId)">
+            <td class="num-cell">{{ i + 1 }}</td>
+            <td>
+              <div class="emp-cell">
+                <div class="emp-avatar">
+                  <img *ngIf="getEmployee(a.employeeId)?.avatar" [src]="getEmployee(a.employeeId)!.avatar" class="avatar-img" />
+                  <span *ngIf="!getEmployee(a.employeeId)?.avatar">{{ getInitials(a.employeeName) }}</span>
                 </div>
-              </td>
-              <td><span class="project-badge">{{ row.project }}</span></td>
-              <td class="task-cell">{{ row.task }}</td>
-              <td>
-                <span class="priority-dot" [style.background]="priorityColor(row.priority)"></span>
-                <span [style.color]="priorityColor(row.priority)" style="font-weight:600;font-size:12px">{{ row.priority }}</span>
-              </td>
-              <td>
-                <div class="progress-wrap">
-                  <div class="progress-bar">
-                    <div class="progress-fill" [style.width.%]="row.progress" [style.background]="statusColor(row.status)"></div>
-                  </div>
-                  <span class="progress-pct" [style.color]="statusColor(row.status)">{{ row.progress }}%</span>
+                <div>
+                  <span class="emp-name">{{ a.employeeName }}</span>
+                  <span class="emp-id">{{ a.employeeId }}</span>
                 </div>
-              </td>
-              <td>
-                <span class="status-badge" [style.background]="statusColor(row.status) + '18'" [style.color]="statusColor(row.status)" [style.border-color]="statusColor(row.status) + '44'">
-                  {{ row.status }}
-                </span>
-              </td>
-              <td class="due-cell">{{ row.dueDate }}</td>
-              <td>
-                <button class="edit-btn" (click)="startEdit(row, $event)">✏️ Edit</button>
-              </td>
-            </tr>
-          </ng-container>
-
-          <tr *ngIf="rows.length === 0">
-            <td colspan="8" class="empty-row">No records match your filters.</td>
+              </div>
+            </td>
+            <td><span class="project-badge">{{ a.project }}</span></td>
+            <td><span class="role-badge">{{ a.role }}</span></td>
+            <td class="date-cell">{{ formatDate(a.startDate) }}</td>
+            <td class="date-cell">{{ formatDate(a.endDate) }}</td>
+            <td class="duration-cell">{{ getDuration(a.startDate, a.endDate) }}</td>
+            <td>
+              <span class="status-pill" [class.active]="isActive(a.endDate)" [class.completed]="!isActive(a.endDate)">
+                {{ isActive(a.endDate) ? 'Active' : 'Completed' }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="8" class="empty-row">No allocations found.</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-  </main>
-
-  <!-- Edit Modal -->
-  <div class="modal-overlay" *ngIf="editRow" (click)="cancelEdit()">
-    <div class="edit-modal" (click)="$event.stopPropagation()">
-      <div class="edit-modal-header">
-        <div class="emp-cell">
-          <div class="emp-avatar" style="width:46px;height:46px;font-size:18px">
-            <img *ngIf="editEmployee?.avatar" [src]="editEmployee!.avatar" class="avatar-img" />
-            <span *ngIf="!editEmployee?.avatar">{{ editEmployee?.name?.charAt(0) }}</span>
-          </div>
-          <div>
-            <strong>{{ editEmployee?.name }}</strong>
-            <span class="emp-role">{{ editEmployee?.role }}</span>
-          </div>
-        </div>
-        <button class="modal-close" (click)="cancelEdit()">✕</button>
-      </div>
-
-      <div class="edit-modal-body">
-        <div class="edit-form-row">
-          <div class="edit-form-group">
-            <label>Project</label>
-            <input class="edit-input" [(ngModel)]="editData.project" placeholder="Project name" />
-          </div>
-          <div class="edit-form-group">
-            <label>Priority</label>
-            <select class="edit-input" [(ngModel)]="editData.priority">
-              <option>High</option><option>Medium</option><option>Low</option>
-            </select>
-          </div>
-        </div>
-        <div class="edit-form-group">
-          <label>Current Task</label>
-          <input class="edit-input" [(ngModel)]="editData.task" placeholder="Task description" />
-        </div>
-        <div class="edit-form-row">
-          <div class="edit-form-group">
-            <label>Status</label>
-            <select class="edit-input" [(ngModel)]="editData.status">
-              <option>In Progress</option><option>Review</option><option>Completed</option><option>On Hold</option>
-            </select>
-          </div>
-          <div class="edit-form-group">
-            <label>Due Date</label>
-            <input class="edit-input" type="date" [(ngModel)]="editData.dueDate" />
-          </div>
-        </div>
-        <div class="edit-form-group">
-          <label>Progress — <strong [style.color]="statusColor(editData.status || '')">{{ editData.progress }}%</strong></label>
-          <input type="range" min="0" max="100" [(ngModel)]="editData.progress" class="progress-slider"
-                 [style.accent-color]="statusColor(editData.status || '')" />
-        </div>
-      </div>
-
-      <div class="edit-modal-footer">
-        <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
-        <button class="btn-save" (click)="saveEdit()">💾 Save Changes</button>
-      </div>
-    </div>
   </div>
-
 </div>

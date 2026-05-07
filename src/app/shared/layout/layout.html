@@ -1,0 +1,92 @@
+<div class="shell">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="brand-logo-wrap">
+        <img src="assets/unite.png" alt="Intellect" class="brand-logo-img" />
+        <div>
+          <div class="brand-text">Intellect Informatics</div>
+          <div class="brand-sub">Enterprise Portal</div>
+        </div>
+      </div>
+      <div class="topbar-divider"></div>
+      <span class="portal-chip">Employee Portal</span>
+    </div>
+    <div class="topbar-right">
+      <div class="datetime-badge">
+        <span>📅 {{ today }}</span>
+        <span class="sep">|</span>
+        <span>🕐 {{ currentTime }}</span>
+      </div>
+      <div class="user-pill" (click)="goToProfile()">
+        <div class="user-avatar">
+          <img *ngIf="displayAvatar" [src]="displayAvatar" class="user-avatar-img" />
+          <span *ngIf="!displayAvatar">{{ displayInitials }}</span>
+        </div>
+        <span class="user-name">{{ displayName }}</span>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <span>⏻</span> Logout
+      </button>
+    </div>
+  </header>
+
+  <div class="body-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main Menu</div>
+
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+          <div class="nav-icon-wrap">🏠</div>
+          <span>Dashboard</span>
+        </a>
+
+        <!-- Admin only menus -->
+        <ng-container *ngIf="isAdmin">
+          <a class="nav-item" routerLink="/work-status" routerLinkActive="active">
+            <div class="nav-icon-wrap">📋</div>
+            <span>Project Allocations</span>
+          </a>
+          <a class="nav-item" routerLink="/holidays" routerLinkActive="active">
+            <div class="nav-icon-wrap">🗓️</div>
+            <span>Holiday Calendar</span>
+          </a>
+        </ng-container>
+
+        <!-- Employee only menus -->
+        <ng-container *ngIf="!isAdmin">
+          <a class="nav-item" routerLink="/my-profile" routerLinkActive="active">
+            <div class="nav-icon-wrap">👤</div>
+            <span>My Profile</span>
+          </a>
+          <a class="nav-item" routerLink="/holidays" routerLinkActive="active">
+            <div class="nav-icon-wrap">🗓️</div>
+            <span>Holiday Calendar</span>
+          </a>
+        </ng-container>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">
+            <img *ngIf="displayAvatar" [src]="displayAvatar" class="sidebar-avatar-img" />
+            <span *ngIf="!displayAvatar">{{ displayInitials }}</span>
+          </div>
+          <div>
+            <span class="sidebar-name">{{ displayName }}</span>
+            <span class="sidebar-role">{{ isAdmin ? 'Super Admin' : (loggedInEmployee?.role || 'Employee') }}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Page Content -->
+    <div class="page-content">
+      <router-outlet />
+    </div>
+
+  </div>
+</div>

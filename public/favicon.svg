@@ -1,7 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#003366"/>
-  <!-- Head -->
-  <circle cx="32" cy="22" r="10" fill="#ffffff"/>
-  <!-- Body -->
-  <path d="M12 54 Q12 38 32 38 Q52 38 52 54 Z" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Background rounded square -->
+  <rect width="64" height="64" rx="14" fill="url(#grad)"/>
+
+  <!-- Building / portal icon -->
+  <!-- Main building body -->
+  <rect x="12" y="28" width="40" height="26" rx="2" fill="white" opacity="0.95"/>
+
+  <!-- Roof / top triangle -->
+  <polygon points="32,10 8,30 56,30" fill="white" opacity="0.85"/>
+
+  <!-- Door -->
+  <rect x="26" y="40" width="12" height="14" rx="2" fill="url(#grad)"/>
+
+  <!-- Windows left -->
+  <rect x="15" y="33" width="8" height="6" rx="1.5" fill="url(#grad)" opacity="0.8"/>
+  <!-- Windows right -->
+  <rect x="41" y="33" width="8" height="6" rx="1.5" fill="url(#grad)" opacity="0.8"/>
+
+  <!-- Shine dot on roof -->
+  <circle cx="32" cy="18" r="3" fill="white" opacity="0.6"/>
+
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1a56db"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+  </defs>
 </svg>

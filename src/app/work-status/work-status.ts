@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EMPLOYEES, WORK_STATUSES, WorkStatus } from '../employee/employee.data';
+import { Router } from '@angular/router';
+import { PROJECT_ALLOCATIONS, ProjectAllocation } from './project-allocation.data';
+import { EMPLOYEES } from '../employee/employee.data';
 
 @Component({
   selector: 'app-work-status',
@@ -12,72 +13,47 @@ import { EMPLOYEES, WORK_STATUSES, WorkStatus } from '../employee/employee.data'
   styleUrl: './work-status.css'
 })
 export class WorkStatusComponent {
+  searchQuery = '';
+  filterProject = 'All';
+  filterRole = 'All';
+
+  projects = ['All', ...Array.from(new Set(PROJECT_ALLOCATIONS.map(p => p.project.split(' - ')[0]))).sort()];
+  roles = ['All', ...Array.from(new Set(PROJECT_ALLOCATIONS.map(p => p.role))).sort()];
+
   constructor(private router: Router) {}
 
-  filterStatus = 'All';
-  filterProject = 'All';
-  searchQuery = '';
-
-  statuses = ['All', 'In Progress', 'Review', 'Completed', 'On Hold'];
-
-  projects = ['All', ...Array.from(new Set(WORK_STATUSES.map(w => w.project))).sort()];
-
-  get rows() {
-    return WORK_STATUSES
-      .filter(w => {
-        const emp = EMPLOYEES.find(e => e.id === w.employeeId);
-        const matchStatus = this.filterStatus === 'All' || w.status === this.filterStatus;
-        const matchProject = this.filterProject === 'All' || w.project === this.filterProject;
-        const matchSearch = !this.searchQuery ||
-          emp?.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          w.project.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          w.task.toLowerCase().includes(this.searchQuery.toLowerCase());
-        return matchStatus && matchProject && matchSearch;
-      })
-      .map(w => ({ ...w, employee: EMPLOYEES.find(e => e.id === w.employeeId) }));
+  get filtered(): ProjectAllocation[] {
+    return PROJECT_ALLOCATIONS.filter(a => {
+      const matchSearch = !this.searchQuery ||
+        a.employeeName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        a.project.toLowerCase().includes(this.searchQuery.toLowerCase());
+      const matchProject = this.filterProject === 'All' || a.project.startsWith(this.filterProject);
+      const matchRole = this.filterRole === 'All' || a.role === this.filterRole;
+      return matchSearch && matchProject && matchRole;
+    });
   }
 
-  get summary() {
-    return {
-      total: WORK_STATUSES.length,
-      inProgress: WORK_STATUSES.filter(w => w.status === 'In Progress').length,
-      review: WORK_STATUSES.filter(w => w.status === 'Review').length,
-      completed: WORK_STATUSES.filter(w => w.status === 'Completed').length,
-      onHold: WORK_STATUSES.filter(w => w.status === 'On Hold').length,
-    };
+  getEmployee(id: string) {
+    return EMPLOYEES.find(e => e.id === id);
   }
 
-  statusColor(status: string) {
-    return { 'In Progress': '#0055a5', 'Review': '#f57c00', 'Completed': '#00897b', 'On Hold': '#e53935' }[status] ?? '#94a3b8';
+  getInitials(name: string) {
+    return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
   }
 
-  priorityColor(p: string) {
-    return { High: '#e53935', Medium: '#f57c00', Low: '#00897b' }[p] ?? '#94a3b8';
+  formatDate(d: string) {
+    return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  getDuration(start: string, end: string) {
+    const s = new Date(start), e = new Date(end);
+    const months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+    return months + ' months';
+  }
+
+  isActive(end: string) {
+    return new Date(end) >= new Date();
   }
 
   viewEmployee(id: string) { this.router.navigate(['/employee', id]); }
-  goBack() { this.router.navigate(['/dashboard']); }
-
-  editRow: string | null = null;
-  editData: Partial<WorkStatus> = {};
-
-  startEdit(emp: any, event: Event) {
-    event.stopPropagation();
-    const original = WORK_STATUSES.find(w => w.employeeId === emp.employeeId);
-    if (!original) return;
-    this.editRow = emp.employeeId;
-    this.editData = { ...original };
-  }
-
-  saveEdit() {
-    const idx = WORK_STATUSES.findIndex(w => w.employeeId === this.editRow);
-    if (idx > -1) Object.assign(WORK_STATUSES[idx], this.editData);
-    this.editRow = null;
-  }
-
-  cancelEdit() { this.editRow = null; }
-
-  get editEmployee() {
-    return EMPLOYEES.find(e => e.id === this.editRow);
-  }
 }

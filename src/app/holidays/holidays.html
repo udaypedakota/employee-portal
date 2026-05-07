@@ -1,0 +1,94 @@
+<div class="hol-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h2>Holiday Calendar <span class="count-badge">{{ allHolidays.length }} holidays</span></h2>
+      <p>View company-wide holidays applicable to you.</p>
+    </div>
+  </div>
+
+  <!-- Directory Card -->
+  <div class="directory-card">
+    <div class="dir-title-row">
+      <span class="dir-title">Holiday Directory</span>
+      <span class="showing-badge">Showing {{ filtered.length }} of {{ allHolidays.length }}</span>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-row">
+      <div class="filter-group">
+        <label>YEAR</label>
+        <div class="select-wrap">
+          <select [(ngModel)]="selectedYear" (ngModelChange)="onYearChange()">
+            <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+          </select>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>MONTH</label>
+        <div class="select-wrap">
+          <select [(ngModel)]="selectedMonth">
+            <option *ngFor="let m of months">{{ m }}</option>
+          </select>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>TYPE</label>
+        <div class="select-wrap">
+          <select [(ngModel)]="selectedType">
+            <option *ngFor="let t of types">{{ t }}</option>
+          </select>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+      <button class="reset-btn" (click)="reset()">⚙ Reset</button>
+    </div>
+
+    <!-- Table Header -->
+    <div class="table-header">
+      <span class="col-date">DATE</span>
+      <span class="col-day">DAY</span>
+      <span class="col-holiday">HOLIDAY</span>
+      <span class="col-type">TYPE</span>
+      <span class="col-optional">OPTIONAL</span>
+      <span class="col-weekly">WEEKLY OFF</span>
+    </div>
+
+    <!-- Holiday Rows -->
+    <div class="holiday-row" *ngFor="let h of filtered">
+      <div class="col-date">
+        <div class="date-box">
+          <span class="date-num">{{ getDayNum(h.date) }}</span>
+          <span class="date-mon">{{ getMonth(h.date) }}</span>
+        </div>
+      </div>
+      <div class="col-day">{{ getDay(h.date) }}</div>
+      <div class="col-holiday">
+        <div class="holiday-avatar">{{ getInitials(h.name) }}</div>
+        <div class="holiday-info">
+          <span class="holiday-name">{{ h.name }}</span>
+          <span class="holiday-date">{{ getFullDate(h.date) }}</span>
+        </div>
+      </div>
+      <div class="col-type">
+        <span class="type-badge" [class.national]="h.type === 'National'" [class.festival]="h.type === 'Festival'" [class.regional]="h.type === 'Regional'">
+          {{ h.type }}
+        </span>
+      </div>
+      <div class="col-optional">
+        <span class="declared-badge">{{ h.optional }}</span>
+      </div>
+      <div class="col-weekly">
+        <span class="weekly-badge" [class.weekly-off]="isWeeklyOff(h.date)">
+          {{ getWeeklyOffLabel(h.date) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="empty" *ngIf="filtered.length === 0">No holidays found for selected filters.</div>
+  </div>
+
+</div>

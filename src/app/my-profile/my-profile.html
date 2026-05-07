@@ -1,0 +1,153 @@
+<div class="profile-page">
+
+  <!-- Admin Message -->
+  <div class="admin-msg" *ngIf="isAdmin">
+    <div class="admin-icon">👤</div>
+    <h2>Admin Account</h2>
+    <p>You're logged in as administrator. This page shows employee personal profiles.</p>
+  </div>
+
+  <!-- Employee Profile -->
+  <div *ngIf="!isAdmin && employee" class="profile-content">
+
+    <!-- Profile Header Card -->
+    <div class="profile-header-card">
+      <div class="profile-avatar-large">
+        <img *ngIf="employee.avatar" [src]="employee.avatar" class="avatar-img" />
+        <span *ngIf="!employee.avatar" class="avatar-initials">{{ initials }}</span>
+      </div>
+      <div class="profile-header-info">
+        <h1>{{ employee.name }}</h1>
+        <div class="profile-meta">
+          <span class="meta-badge role">{{ employee.role }}</span>
+          <span class="meta-badge dept">{{ employee.department }}</span>
+          <span class="meta-badge id">{{ employee.id }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact & Details Grid -->
+    <div class="details-grid">
+      <div class="detail-card">
+        <div class="detail-icon">✉️</div>
+        <div>
+          <span class="detail-label">Email</span>
+          <span class="detail-value">{{ employee.email }}</span>
+        </div>
+      </div>
+      <div class="detail-card" *ngIf="employee.phone">
+        <div class="detail-icon">📞</div>
+        <div>
+          <span class="detail-label">Phone</span>
+          <span class="detail-value">{{ employee.phone }}</span>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon">🏢</div>
+        <div>
+          <span class="detail-label">Department</span>
+          <span class="detail-value">{{ employee.department }}</span>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon">💼</div>
+        <div>
+          <span class="detail-label">Role</span>
+          <span class="detail-value">{{ employee.role }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills -->
+    <div class="section-card" *ngIf="employee.skills">
+      <div class="section-header">
+        <span class="section-icon">🛠️</span>
+        <h3>Skills & Technologies</h3>
+      </div>
+      <div class="skills-wrap">
+        <span class="skill-tag" *ngFor="let skill of employee.skills.split(',')">{{ skill.trim() }}</span>
+      </div>
+    </div>
+
+    <!-- Projects -->
+    <div class="section-card" *ngIf="employee.projects">
+      <div class="section-header">
+        <span class="section-icon">📁</span>
+        <h3>Projects</h3>
+      </div>
+      <p class="projects-text">{{ employee.projects }}</p>
+    </div>
+
+    <!-- Current Work Status -->
+    <div class="section-card" *ngIf="workStatus">
+      <div class="section-header">
+        <span class="section-icon">⚡</span>
+        <h3>Current Work Status</h3>
+      </div>
+      <div class="work-status-card">
+        <div class="ws-row">
+          <span class="ws-label">Project</span>
+          <span class="ws-value project-badge">{{ workStatus.project }}</span>
+        </div>
+        <div class="ws-row">
+          <span class="ws-label">Task</span>
+          <span class="ws-value">{{ workStatus.task }}</span>
+        </div>
+        <div class="ws-row">
+          <span class="ws-label">Status</span>
+          <span class="ws-value status-badge" [style.background]="statusColor(workStatus.status) + '18'" [style.color]="statusColor(workStatus.status)" [style.border-color]="statusColor(workStatus.status) + '44'">
+            {{ workStatus.status }}
+          </span>
+        </div>
+        <div class="ws-row">
+          <span class="ws-label">Priority</span>
+          <span class="ws-value priority-badge" [style.color]="priorityColor(workStatus.priority)">
+            <span class="priority-dot" [style.background]="priorityColor(workStatus.priority)"></span>
+            {{ workStatus.priority }}
+          </span>
+        </div>
+        <div class="ws-row">
+          <span class="ws-label">Progress</span>
+          <div class="progress-wrap">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="workStatus.progress" [style.background]="statusColor(workStatus.status)"></div>
+            </div>
+            <span class="progress-pct" [style.color]="statusColor(workStatus.status)">{{ workStatus.progress }}%</span>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-label">Due Date</span>
+          <span class="ws-value">{{ workStatus.dueDate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- About (PM only) -->
+    <div class="section-card" *ngIf="employee.about">
+      <div class="section-header">
+        <span class="section-icon">👤</span>
+        <h3>About</h3>
+      </div>
+      <p class="about-text">{{ employee.about }}</p>
+    </div>
+
+    <!-- Facts (PM only) -->
+    <div class="section-card" *ngIf="employee.facts">
+      <div class="section-header">
+        <span class="section-icon">✨</span>
+        <h3>Interesting Facts</h3>
+      </div>
+      <div class="facts-grid">
+        <div class="fact-card" *ngFor="let f of employee.facts">
+          <span class="fact-icon">{{ f.icon }}</span>
+          <div>
+            <span class="fact-label">{{ f.label }}</span>
+            <span class="fact-value">{{ f.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
