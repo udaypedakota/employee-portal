@@ -1,79 +1,67 @@
 <div class="ws-wrapper">
   <div class="main">
 
-    <!-- Page Header -->
+    <!-- Header -->
     <div class="page-header">
       <div>
-        <h2>Project Allocations</h2>
-        <p>Employee project assignments with start and end dates</p>
+        <h2>Project Hub</h2>
+        <p>All active projects, teams and tech stacks at a glance</p>
       </div>
-      <div class="total-badge">{{ filtered.length }} Allocations</div>
-    </div>
-
-    <!-- Filters -->
-    <div class="filters-bar">
-      <input class="search-input" [(ngModel)]="searchQuery" placeholder="🔍 Search employee or project..." />
-      <div class="filter-group">
-        <label>Project</label>
-        <select [(ngModel)]="filterProject">
-          <option *ngFor="let p of projects">{{ p }}</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Role</label>
-        <select [(ngModel)]="filterRole">
-          <option *ngFor="let r of roles">{{ r }}</option>
-        </select>
+      <div class="header-stats">
+        <div class="hstat"><span>{{ projects.length }}</span><label>Projects</label></div>
+        <div class="hstat"><span>{{ totalMembers }}</span><label>Members</label></div>
+        <div class="hstat active"><span>{{ activeCount }}</span><label>Active</label></div>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="table-card">
-      <table class="alloc-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Employee</th>
-            <th>Project</th>
-            <th>Role</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Duration</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let a of filtered; let i = index" class="data-row" (click)="viewEmployee(a.employeeId)">
-            <td class="num-cell">{{ i + 1 }}</td>
-            <td>
-              <div class="emp-cell">
-                <div class="emp-avatar">
-                  <img *ngIf="getEmployee(a.employeeId)?.avatar" [src]="getEmployee(a.employeeId)!.avatar" class="avatar-img" />
-                  <span *ngIf="!getEmployee(a.employeeId)?.avatar">{{ getInitials(a.employeeName) }}</span>
-                </div>
-                <div>
-                  <span class="emp-name">{{ a.employeeName }}</span>
-                  <span class="emp-id">{{ a.employeeId }}</span>
-                </div>
-              </div>
-            </td>
-            <td><span class="project-badge">{{ a.project }}</span></td>
-            <td><span class="role-badge">{{ a.role }}</span></td>
-            <td class="date-cell">{{ formatDate(a.startDate) }}</td>
-            <td class="date-cell">{{ formatDate(a.endDate) }}</td>
-            <td class="duration-cell">{{ getDuration(a.startDate, a.endDate) }}</td>
-            <td>
-              <span class="status-pill" [class.active]="isActive(a.endDate)" [class.completed]="!isActive(a.endDate)">
-                {{ isActive(a.endDate) ? 'Active' : 'Completed' }}
-              </span>
-            </td>
-          </tr>
-          <tr *ngIf="filtered.length === 0">
-            <td colspan="8" class="empty-row">No allocations found.</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Search -->
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input [(ngModel)]="searchQuery" placeholder="Search project or employee..." />
     </div>
+
+    <!-- Project Cards Grid -->
+    <div class="projects-grid">
+      <div class="project-card" *ngFor="let p of filteredProjects" (click)="toggleProject(p.name)" [class.expanded]="expandedProject === p.name">
+
+        <!-- Card Header -->
+        <div class="card-top">
+          <div class="project-icon" [style.background]="p.color + '22'" [style.color]="p.color">{{ p.icon }}</div>
+          <div class="project-meta">
+            <span class="project-name">{{ p.name }}</span>
+            <span class="project-domain">{{ p.domain }}</span>
+          </div>
+          <span class="status-dot" [class.active]="p.active"></span>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="tech-row">
+          <span class="tech-tag" *ngFor="let t of p.tech">{{ t }}</span>
+        </div>
+
+        <!-- Modules -->
+        <div class="modules-section" *ngIf="p.modules?.length">
+          <div class="modules-header" (click)="$event.stopPropagation(); toggleProject(p.name)">
+            <span class="modules-title">Modules ({{ p.modules!.length }})</span>
+            <span class="expand-icon">{{ expandedProject === p.name ? '▲' : '▼' }}</span>
+          </div>
+          <div class="modules-list" *ngIf="expandedProject === p.name">
+            <div class="module-row" *ngFor="let m of p.modules">
+              <span class="module-dot" [class]="m.status === 'Completed' ? 'done' : m.status === 'Planned' ? 'planned' : 'wip'"></span>
+              <span class="module-name">{{ m.name }}</span>
+              <span class="module-status" [class]="m.status === 'Completed' ? 'done' : m.status === 'Planned' ? 'planned' : 'wip'">{{ m.status }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-bottom">
+          <span class="status-badge" [class.active]="p.active">{{ p.active ? '🟢 Active' : '⚫ Completed' }}</span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="empty" *ngIf="filteredProjects.length === 0">No projects found.</div>
 
   </div>
 </div>

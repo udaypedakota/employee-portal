@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
-import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { EMPLOYEES, Employee } from '../../employee/employee.data';
 
 @Component({
   selector: 'app-layout',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterModule],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
 })

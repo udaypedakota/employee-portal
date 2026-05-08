@@ -119,7 +119,7 @@
   flex-shrink: 0;
   border-right: 1px solid rgba(255,255,255,0.04);
   position: relative;
-  overflow: visible;
+  overflow: hidden;
 }
 .sidebar::after {
   content: '';
@@ -129,7 +129,7 @@
   background: linear-gradient(180deg, transparent, rgba(99,102,241,0.3), transparent);
 }
 
-.sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; overflow-x: visible; }
+.sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; }
 
 .nav-section-label {
   font-size: 10px; font-weight: 700;
@@ -372,12 +372,11 @@
     z-index: 150;
     transform: translateX(-100%);
     transition: transform 0.28s ease;
-    overflow: hidden;
+    overflow-y: auto;
   }
   .sidebar.open { transform: translateX(0); }
   .sidebar-overlay { display: block; }
 
   .page-content { width: 100%; }
-
   .user-name { display: none; }
 }

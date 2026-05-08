@@ -8,6 +8,8 @@ import { MyProfileComponent } from './my-profile/my-profile';
 import { LayoutComponent } from './shared/layout/layout';
 import { SettingsComponent } from './settings/settings';
 import { HelpCenterComponent } from './help-center/help-center';
+import { AnnouncementsComponent } from './announcements/announcements';
+import { LeaveTrackerComponent } from './leave-tracker/leave-tracker';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -23,6 +25,8 @@ export const routes: Routes = [
       { path: 'my-profile', component: MyProfileComponent },
       { path: 'settings', component: SettingsComponent },
       { path: 'help-center', component: HelpCenterComponent },
+      { path: 'announcements', component: AnnouncementsComponent },
+      { path: 'leave-tracker', component: LeaveTrackerComponent },
     ]
   }
 ];

@@ -1,0 +1,92 @@
+<div class="ann-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>📢 Announcements</h2>
+      <p>Company news, updates and events</p>
+    </div>
+    <button class="add-btn" *ngIf="isAdmin" (click)="openForm()">+ New Announcement</button>
+  </div>
+
+  <!-- Category Filter -->
+  <div class="filter-row">
+    <button class="filter-btn" *ngFor="let c of categories"
+      [class.active]="filter === c"
+      [style.--cat-color]="categoryColor(c)"
+      (click)="filter = c">{{ c }}</button>
+  </div>
+
+  <!-- List -->
+  <div class="ann-list">
+    <div class="ann-card" *ngFor="let a of filtered" [class.pinned]="a.pinned" (click)="toggleExpand(a.id)">
+
+      <div class="ann-card-top">
+        <div class="ann-left">
+          <span class="pin-icon" *ngIf="a.pinned">📌</span>
+          <div class="cat-badge" [style.background]="categoryBg(a.category)" [style.color]="categoryColor(a.category)">
+            {{ a.category }}
+          </div>
+          <span class="ann-title">{{ a.title }}</span>
+        </div>
+        <div class="ann-right">
+          <span class="ann-date">{{ formatDate(a.date) }}</span>
+          <span class="ann-chevron" [class.open]="expandedId === a.id">›</span>
+        </div>
+      </div>
+
+      <div class="ann-body" *ngIf="expandedId === a.id">
+        <p>{{ a.body }}</p>
+        <div class="ann-footer">
+          <span class="ann-author">— {{ a.author }}</span>
+          <div class="ann-actions" *ngIf="isAdmin" (click)="$event.stopPropagation()">
+            <button class="action-btn pin" (click)="togglePin(a)">{{ a.pinned ? 'Unpin' : 'Pin' }}</button>
+            <button class="action-btn delete" (click)="deleteAnn(a.id)">Delete</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="empty" *ngIf="filtered.length === 0">No announcements in this category.</div>
+  </div>
+
+  <!-- Add Modal -->
+  <div class="modal-overlay" *ngIf="showForm" (click)="showForm = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>New Announcement</h3>
+        <button (click)="showForm = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label>Title *</label>
+          <input [(ngModel)]="newAnn.title" placeholder="Announcement title" />
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label>Category</label>
+            <select [(ngModel)]="newAnn.category">
+              <option>General</option><option>HR</option><option>Technical</option><option>Event</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Date</label>
+            <input type="date" [(ngModel)]="newAnn.date" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Message *</label>
+          <textarea [(ngModel)]="newAnn.body" rows="4" placeholder="Write your announcement..."></textarea>
+        </div>
+        <label class="pin-check">
+          <input type="checkbox" [(ngModel)]="newAnn.pinned" /> Pin this announcement
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showForm = false">Cancel</button>
+        <button class="btn-save" (click)="saveAnn()">Post</button>
+      </div>
+    </div>
+  </div>
+
+</div>

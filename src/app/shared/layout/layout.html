@@ -91,47 +91,68 @@
 
   <div class="body-layout">
 
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" (click)="sidebarOpen = false" *ngIf="sidebarOpen"></div>
+
     <!-- Sidebar -->
     <aside class="sidebar" [class.open]="sidebarOpen">
-      <div class="sidebar-overlay" (click)="sidebarOpen = false" *ngIf="sidebarOpen"></div>
-
       <nav class="sidebar-nav">
-        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" (click)="sidebarOpen = false">
           <div class="nav-icon-wrap">🏠</div>
           <span>Dashboard</span>
         </a>
 
         <ng-container *ngIf="isAdmin">
-          <a class="nav-item" routerLink="/work-status" routerLinkActive="active">
+          <a class="nav-item" routerLink="/work-status" routerLinkActive="active" (click)="sidebarOpen = false">
             <div class="nav-icon-wrap">📋</div>
-            <span>Project Allocations</span>
+            <span>Project Hub</span>
           </a>
-          <a class="nav-item" routerLink="/holidays" routerLinkActive="active">
+          <a class="nav-item" routerLink="/announcements" routerLinkActive="active" (click)="sidebarOpen = false">
+            <div class="nav-icon-wrap">📢</div>
+            <span>Announcements</span>
+          </a>
+          <a class="nav-item" routerLink="/leave-tracker" routerLinkActive="active" (click)="sidebarOpen = false">
             <div class="nav-icon-wrap">🗓️</div>
+            <span>Leave Tracker</span>
+          </a>
+          <a class="nav-item" routerLink="/holidays" routerLinkActive="active" (click)="sidebarOpen = false">
+            <div class="nav-icon-wrap">🎉</div>
             <span>Holiday Calendar</span>
           </a>
         </ng-container>
 
         <ng-container *ngIf="!isAdmin">
-          <a class="nav-item" routerLink="/my-profile" routerLinkActive="active">
+          <a class="nav-item" routerLink="/my-profile" routerLinkActive="active" (click)="sidebarOpen = false">
             <div class="nav-icon-wrap">👤</div>
             <span>My Profile</span>
           </a>
-          <a class="nav-item" routerLink="/holidays" routerLinkActive="active">
+          <a class="nav-item" routerLink="/work-status" routerLinkActive="active" (click)="sidebarOpen = false">
+            <div class="nav-icon-wrap">📋</div>
+            <span>Project Hub</span>
+          </a>
+          <a class="nav-item" routerLink="/announcements" routerLinkActive="active" (click)="sidebarOpen = false">
+            <div class="nav-icon-wrap">📢</div>
+            <span>Announcements</span>
+          </a>
+          <a class="nav-item" routerLink="/leave-tracker" routerLinkActive="active" (click)="sidebarOpen = false">
             <div class="nav-icon-wrap">🗓️</div>
+            <span>Leave Tracker</span>
+          </a>
+          <a class="nav-item" routerLink="/holidays" routerLinkActive="active" (click)="sidebarOpen = false">
+            <div class="nav-icon-wrap">🎉</div>
             <span>Holiday Calendar</span>
           </a>
         </ng-container>
       </nav>
 
       <div class="sidebar-footer">
-        <a class="footer-nav-item" routerLink="/settings" routerLinkActive="active">
+        <a class="footer-nav-item" routerLink="/settings" routerLinkActive="active" (click)="sidebarOpen = false">
           <span class="footer-nav-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </span>
           Settings
         </a>
-        <a class="footer-nav-item" routerLink="/help-center" routerLinkActive="active">
+        <a class="footer-nav-item" routerLink="/help-center" routerLinkActive="active" (click)="sidebarOpen = false">
           <span class="footer-nav-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </span>
