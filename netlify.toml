@@ -1,0 +1,8 @@
+[build]
+  command = "ng build"
+  publish = "dist/employe-portal/browser"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
